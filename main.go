@@ -10,6 +10,7 @@ import (
 
 func main() {
 	log.SetFlags(0)
+	service.SetupNotebookCircuitBreaker()
 	for {
 		nc, err := nats.Connect("nats://nats.cloud-ml-mgmt:4222")
 		if err != nil {
