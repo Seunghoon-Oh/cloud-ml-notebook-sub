@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"time"
+	"sync"
 
 	"github.com/nats-io/nats.go"
 )
@@ -24,17 +23,49 @@ func main() {
 	// opts := []nats.Option{nats.Name("NATS Subscriber")}
 	// opts = setupConnOptions(opts)
 	for {
-		time.Sleep(1 * time.Second)
-		// Connect to NATS
+		// time.Sleep(1 * time.Second)
+		// // Connect to NATS
+		// // nc, err := nats.Connect("nats://nats.cloud-ml-mgmt:4222")
+		// nc, err := nats.Connect(nats.DefaultURL)
+		// log.Println("Connected")
+		// if err != nil {
+		// 	log.Println(err)
+		// 	continue
+		// }
+
+		// sub, _ := nc.SubscribeSync("updates")
+		// msg, _ := sub.NextMsg(10 * time.Millisecond)
+
+		// // Use the response
+		// log.Printf("Reply: %s", msg.Data)
+
+		// // log.Println(msg)
+		// // fmt.Println(msg)
+		// // fmt.Printf("msg data: %q on subject %q\n", string(msg.Data), msg.Subject)
+		// [begin subscribe_sync]
+		// nc, err := nats.Connect(nats.DefaultURL)
 		nc, err := nats.Connect("nats://nats.cloud-ml-mgmt:4222")
 		if err != nil {
-			log.Println(err)
-			continue
+			log.Fatal(err)
+		}
+		defer nc.Close()
+
+		// Use a WaitGroup to wait for a message to arrive
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		// Subscribe
+		if _, err := nc.Subscribe("notebook", func(m *nats.Msg) {
+			log.Printf("Reply: %s", m.Data)
+			// wg.Done()
+		}); err != nil {
+			log.Fatal(err)
 		}
 
-		sub, _ := nc.SubscribeSync("greet.*")
-		msg, _ := sub.NextMsg(10 * time.Millisecond)
-		fmt.Printf("msg data: %q on subject %q\n", string(msg.Data), msg.Subject)
+		// Wait for a message to come in
+		wg.Wait()
+
+		// [end subscribe_async]
 
 	}
 

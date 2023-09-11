@@ -1,4 +1,4 @@
-module github.com/Seunghoon-Oh/cloud-ml-notebook-sub
+module github.com/Seunghoon-Oh/cloud-ml-notebook-subscriber
 
 go 1.21.0
 
