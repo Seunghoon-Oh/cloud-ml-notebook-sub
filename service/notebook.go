@@ -8,22 +8,22 @@ import (
 	circuit "github.com/rubyist/circuitbreaker"
 )
 
-var notebookCb *circuit.Breaker
-var notebookClient *circuit.HTTPClient
+var cb *circuit.Breaker
+var httpClient *circuit.HTTPClient
 
 func SetupNotebookCircuitBreaker() {
-	notebookClient, notebookCb = network.GetHttpClient()
+	httpClient, cb = network.GetHttpClient()
 }
 
 func CreateNotebook() {
-	if notebookCb.Ready() {
-		resp, err := notebookClient.Post("http://cloud-ml-notebook-manager.cloud-ml-notebook:8082/notebook", "", nil)
+	if cb.Ready() {
+		resp, err := httpClient.Post("http://cloud-ml-notebook-manager.cloud-ml-notebook:8082/notebook", "", nil)
 		if err != nil {
 			fmt.Println(err)
-			notebookCb.Fail()
+			cb.Fail()
 			return
 		}
-		notebookCb.Success()
+		cb.Success()
 		defer resp.Body.Close()
 		rsData := network.ResponseData{}
 		json.NewDecoder(resp.Body).Decode(&rsData)
